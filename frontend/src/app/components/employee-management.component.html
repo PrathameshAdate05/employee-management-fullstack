@@ -1,0 +1,478 @@
+<div class="employee-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Employee Management</h1>
+    <p class="page-subtitle">Manage your team members efficiently</p>
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control search-input"
+            placeholder="Search employees by name, email, or phone..."
+            [(ngModel)]="searchQuery"
+            (input)="onSearchInput()"
+            (keyup.enter)="searchEmployees()"
+          />
+          <button
+            class="btn search-btn"
+            type="button"
+            (click)="searchEmployees()"
+            [disabled]="isLoading"
+          >
+            <i class="fas fa-search"></i>
+          </button>
+          <button
+            class="btn clear-btn"
+            type="button"
+            (click)="clearSearch()"
+            *ngIf="searchQuery"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <div class="col-md-4 text-end">
+        <button
+          class="btn add-btn"
+          (click)="openAddModal()"
+          [disabled]="isLoading"
+        >
+          <i class="fas fa-plus me-2"></i>Add Employee
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3 text-muted">Loading employees...</p>
+  </div>
+
+  <!-- Employee Grid -->
+  <div class="employee-grid" *ngIf="!isLoading">
+    <div class="employee-card" *ngFor="let employee of filteredEmployees">
+      <!-- Employee Avatar -->
+      <div class="employee-avatar">
+        {{ getInitials(employee.name) }}
+      </div>
+
+      <!-- Employee Info -->
+      <h5 class="employee-name">{{ employee.name }}</h5>
+      <div class="employee-detail">
+        <i class="fas fa-envelope"></i>
+        <span>{{ employee.email }}</span>
+      </div>
+      <div class="employee-detail">
+        <i class="fas fa-briefcase"></i>
+        <span>{{ employee.position }}</span>
+      </div>
+      <div class="employee-detail">
+        <i class="fas fa-phone"></i>
+        <span>{{ employee.phone }}</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="employee-actions">
+        <button
+          class="btn action-btn edit-btn"
+          (click)="openEditModal(employee)"
+          title="Edit Employee"
+        >
+          <i class="fas fa-edit"></i>
+        </button>
+        <button
+          class="btn action-btn delete-btn"
+          (click)="openDeleteModal(employee)"
+          title="Delete Employee"
+        >
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && filteredEmployees.length === 0">
+    <i class="fas fa-users"></i>
+    <h4>No employees found</h4>
+    <p *ngIf="searchQuery">Try adjusting your search criteria</p>
+    <p *ngIf="!searchQuery">Get started by adding your first employee</p>
+    <button
+      class="btn add-btn mt-3"
+      (click)="openAddModal()"
+      *ngIf="!searchQuery"
+    >
+      <i class="fas fa-plus me-2"></i>Add Employee
+    </button>
+  </div>
+</div>
+
+<!-- Add Employee Modal -->
+<div
+  class="modal fade"
+  [class.show]="showAddModal"
+  [style.display]="showAddModal ? 'block' : 'none'"
+  tabindex="-1"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Employee</h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="closeAddModal()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form #addForm="ngForm" (ngSubmit)="addEmployee()">
+          <div class="mb-3">
+            <label for="addName" class="form-label">Name *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="addName"
+              [(ngModel)]="newEmployee.name"
+              name="name"
+              required
+              minlength="2"
+              maxlength="50"
+              pattern="[a-zA-Z\s]+"
+              #nameInput="ngModel"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="nameInput.invalid && nameInput.touched"
+            >
+              <div *ngIf="nameInput.errors?.['required']">Name is required</div>
+              <div *ngIf="nameInput.errors?.['minlength']">
+                Name must be at least 2 characters
+              </div>
+              <div *ngIf="nameInput.errors?.['pattern']">
+                Name can only contain letters and spaces
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="addEmail" class="form-label">Email *</label>
+            <input
+              type="email"
+              class="form-control"
+              id="addEmail"
+              [(ngModel)]="newEmployee.email"
+              name="email"
+              required
+              email
+              maxlength="100"
+              #emailInput="ngModel"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="emailInput.invalid && emailInput.touched"
+            >
+              <div *ngIf="emailInput.errors?.['required']">
+                Email is required
+              </div>
+              <div *ngIf="emailInput.errors?.['email']">
+                Please enter a valid email address
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="addPosition" class="form-label">Position *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="addPosition"
+              [(ngModel)]="newEmployee.position"
+              name="position"
+              required
+              minlength="2"
+              maxlength="50"
+              #positionInput="ngModel"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="positionInput.invalid && positionInput.touched"
+            >
+              <div *ngIf="positionInput.errors?.['required']">
+                Position is required
+              </div>
+              <div *ngIf="positionInput.errors?.['minlength']">
+                Position must be at least 2 characters
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="addPhone" class="form-label">Phone *</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="addPhone"
+              [(ngModel)]="newEmployee.phone"
+              name="phone"
+              required
+              pattern="[\+]?[1-9][\d\s\-\(\)]{8,15}"
+              minlength="10"
+              maxlength="20"
+              #phoneInput="ngModel"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="phoneInput.invalid && phoneInput.touched"
+            >
+              <div *ngIf="phoneInput.errors?.['required']">
+                Phone number is required
+              </div>
+              <div *ngIf="phoneInput.errors?.['pattern']">
+                Please enter a valid phone number
+              </div>
+              <div *ngIf="phoneInput.errors?.['minlength']">
+                Phone number must be at least 10 digits
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeAddModal()"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="addEmployee()"
+          [disabled]="isLoading"
+        >
+          <span
+            *ngIf="isLoading"
+            class="spinner-border spinner-border-sm me-2"
+          ></span>
+          Add Employee
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Employee Modal -->
+<div
+  class="modal fade"
+  [class.show]="showEditModal"
+  [style.display]="showEditModal ? 'block' : 'none'"
+  tabindex="-1"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Employee</h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="closeEditModal()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form #editForm="ngForm" (ngSubmit)="updateEmployee()">
+          <div class="mb-3">
+            <label for="editName" class="form-label">Name *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="editName"
+              [(ngModel)]="editEmployee.name"
+              name="name"
+              required
+              minlength="2"
+              maxlength="50"
+              pattern="[a-zA-Z\s]+"
+              #editNameInput="ngModel"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="editNameInput.invalid && editNameInput.touched"
+            >
+              <div *ngIf="editNameInput.errors?.['required']">
+                Name is required
+              </div>
+              <div *ngIf="editNameInput.errors?.['minlength']">
+                Name must be at least 2 characters
+              </div>
+              <div *ngIf="editNameInput.errors?.['pattern']">
+                Name can only contain letters and spaces
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="editEmail" class="form-label">Email *</label>
+            <input
+              type="email"
+              class="form-control"
+              id="editEmail"
+              [(ngModel)]="editEmployee.email"
+              name="email"
+              required
+              email
+              maxlength="100"
+              #editEmailInput="ngModel"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="editEmailInput.invalid && editEmailInput.touched"
+            >
+              <div *ngIf="editEmailInput.errors?.['required']">
+                Email is required
+              </div>
+              <div *ngIf="editEmailInput.errors?.['email']">
+                Please enter a valid email address
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="editPosition" class="form-label">Position *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="editPosition"
+              [(ngModel)]="editEmployee.position"
+              name="position"
+              required
+              minlength="2"
+              maxlength="50"
+              #editPositionInput="ngModel"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="editPositionInput.invalid && editPositionInput.touched"
+            >
+              <div *ngIf="editPositionInput.errors?.['required']">
+                Position is required
+              </div>
+              <div *ngIf="editPositionInput.errors?.['minlength']">
+                Position must be at least 2 characters
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="editPhone" class="form-label">Phone *</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="editPhone"
+              [(ngModel)]="editEmployee.phone"
+              name="phone"
+              required
+              pattern="[\+]?[1-9][\d\s\-\(\)]{8,15}"
+              minlength="10"
+              maxlength="20"
+              #editPhoneInput="ngModel"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="editPhoneInput.invalid && editPhoneInput.touched"
+            >
+              <div *ngIf="editPhoneInput.errors?.['required']">
+                Phone number is required
+              </div>
+              <div *ngIf="editPhoneInput.errors?.['pattern']">
+                Please enter a valid phone number
+              </div>
+              <div *ngIf="editPhoneInput.errors?.['minlength']">
+                Phone number must be at least 10 digits
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeEditModal()"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="updateEmployee()"
+          [disabled]="isLoading"
+        >
+          <span
+            *ngIf="isLoading"
+            class="spinner-border spinner-border-sm me-2"
+          ></span>
+          Update Employee
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div
+  class="modal fade"
+  [class.show]="showDeleteModal"
+  [style.display]="showDeleteModal ? 'block' : 'none'"
+  tabindex="-1"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger">Delete Employee</h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="closeDeleteModal()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Are you sure you want to delete
+          <strong>{{ selectedEmployee?.name }}</strong
+          >?
+        </p>
+        <p class="text-muted">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeDeleteModal()"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="deleteEmployee()"
+          [disabled]="isLoading"
+        >
+          <span
+            *ngIf="isLoading"
+            class="spinner-border spinner-border-sm me-2"
+          ></span>
+          Delete Employee
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div
+  class="modal-backdrop fade show"
+  *ngIf="showAddModal || showEditModal || showDeleteModal"
+></div>
