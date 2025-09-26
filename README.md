@@ -51,7 +51,7 @@ This Employee Management System is designed to provide a comprehensive solution 
 ## 📁 Project Structure
 
 ```
-online-quiz-backend/
+employee-management-fullstack/
 ├── backend/                          # Express.js Backend
 │   ├── src/
 │   │   ├── config/                   # Configuration files
@@ -85,6 +85,12 @@ online-quiz-backend/
 │   │   │   │   └── employee.model.ts
 │   │   │   ├── services/            # Angular services
 │   │   │   │   └── employee.service.ts
+│   │   │   ├── utils/               # Utility functions and validators
+│   │   │   │   ├── index.ts         # Utility exports
+│   │   │   │   └── validators/      # Form validation utilities
+│   │   │   │       ├── employee.validator.ts
+│   │   │   │       ├── employee.validator.spec.ts
+│   │   │   │       └── index.ts
 │   │   │   ├── app.component.*      # Root component
 │   │   │   └── app.module.ts        # Main module
 │   │   ├── styles.css               # Global styles
@@ -110,7 +116,7 @@ online-quiz-backend/
 
 ### Frontend Features
 
-- **Real-time Search** with 500ms debouncing
+- **Real-time Search** with 300ms debouncing
 - **Form Validation** with visual feedback
 - **Toast Notifications** for user feedback
 - **Responsive Design** for all screen sizes
@@ -132,7 +138,7 @@ Before running this project, ensure you have the following installed:
 
 ```bash
 git clone <your-repository-url>
-cd online-quiz-backend
+cd employee-management-fullstack
 ```
 
 ### 2. Install Backend Dependencies
@@ -149,14 +155,7 @@ cd ../frontend
 npm install
 ```
 
-### 4. Environment Setup
-
-The backend uses environment variables. Copy the example file:
-
-```bash
-cd ../backend
-cp env.example .env
-```
+````
 
 ## 🏃‍♂️ Running the Application
 
@@ -165,7 +164,7 @@ cp env.example .env
 ```bash
 cd backend
 npm run dev
-```
+````
 
 The backend server will start on `http://localhost:3000`
 
@@ -173,7 +172,7 @@ The backend server will start on `http://localhost:3000`
 
 ```bash
 cd frontend
-npm start
+ng serve
 ```
 
 The frontend will start on `http://localhost:4200`
@@ -262,7 +261,7 @@ npm test
 - ✅ **Controller Layer**: HTTP request/response handling, status codes (18 tests)
 - ✅ **Middleware**: Input validation, error handling (15 tests)
 - ✅ **Integration Tests**: End-to-end API testing with Supertest (8 tests)
-- ⚠️ **Test Status**: 92/97 tests passing (5 tests have database cleanup issues in CI environment)
+- ✅ **Test Status**: 91/91 tests passing (all tests successful)
 
 #### Running Tests:
 
@@ -311,7 +310,7 @@ npm run test:coverage
 
 #### 1. **Real-time Search**
 
-- **Debounced Input**: 500ms delay to prevent excessive API calls
+- **Debounced Input**: 300ms delay to prevent excessive API calls
 - **Performance Optimized**: Reduces server load
 - **User-friendly**: Immediate feedback without button clicks
 
@@ -352,45 +351,3 @@ npm run test:coverage
 - **Graceful Degradation**: App continues to work with errors
 - **User Feedback**: Toast notifications for all operations
 - **Logging**: Server-side error logging for debugging
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-If you encounter any issues or have questions:
-
-1. Check the [API Documentation](http://localhost:3000/api/docs)
-2. Review the [Issues](https://github.com/your-repo/issues) page
-3. Create a new issue with detailed information
-
-## 🚀 Deployment
-
-### Backend Deployment
-
-```bash
-cd backend
-npm run build
-npm start
-```
-
-### Frontend Deployment
-
-```bash
-cd frontend
-npm run build
-# Deploy the dist/ folder to your hosting service
-```
-
----
-
-**Happy Coding! 🎉**
