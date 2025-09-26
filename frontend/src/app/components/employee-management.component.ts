@@ -6,6 +6,7 @@ import {
   CreateEmployeeRequest,
   UpdateEmployeeRequest,
 } from "../models/employee.model";
+import { EmployeeValidator } from "../utils/validators";
 
 @Component({
   selector: "app-employee-management",
@@ -186,7 +187,7 @@ export class EmployeeManagementComponent implements OnInit {
   }
 
   addEmployee(): void {
-    const validation = this.validateEmployeeData(this.newEmployee);
+    const validation = EmployeeValidator.validateEmployeeData(this.newEmployee);
     if (!validation.isValid) {
       validation.errors.forEach((error) => {
         this.toastr.warning(error, "Validation Error");
@@ -225,7 +226,9 @@ export class EmployeeManagementComponent implements OnInit {
       return;
     }
 
-    const validation = this.validateEmployeeData(this.editEmployee);
+    const validation = EmployeeValidator.validateEmployeeData(
+      this.editEmployee
+    );
     if (!validation.isValid) {
       validation.errors.forEach((error) => {
         this.toastr.warning(error, "Validation Error");
@@ -302,57 +305,6 @@ export class EmployeeManagementComponent implements OnInit {
         this.isLoading = false;
       },
     });
-  }
-
-  private isValidEmployee(
-    employee: CreateEmployeeRequest | UpdateEmployeeRequest
-  ): boolean {
-    const requiredFields = ["name", "email", "position", "phone"];
-    return requiredFields.every((field) => {
-      const value = employee[field as keyof typeof employee];
-      return value && value.toString().trim().length > 0;
-    });
-  }
-
-  private validateEmployeeData(
-    employee: CreateEmployeeRequest | UpdateEmployeeRequest
-  ): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
-    // Required field validation
-    if (!employee.name || employee.name.trim().length === 0) {
-      errors.push("Name is required");
-    }
-
-    if (!employee.email || employee.email.trim().length === 0) {
-      errors.push("Email is required");
-    } else {
-      // Email format validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(employee.email.trim())) {
-        errors.push("Please enter a valid email address");
-      }
-    }
-
-    if (!employee.position || employee.position.trim().length === 0) {
-      errors.push("Position is required");
-    }
-
-    if (!employee.phone || employee.phone.trim().length === 0) {
-      errors.push("Phone number is required");
-    } else {
-      // Phone number validation (basic)
-      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-      const cleanPhone = employee.phone.replace(/[\s\-\(\)]/g, "");
-      if (!phoneRegex.test(cleanPhone) || cleanPhone.length < 10) {
-        errors.push("Please enter a valid phone number");
-      }
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors: errors,
-    };
   }
 
   getInitials(name: string): string {

@@ -7,7 +7,11 @@ import { of, throwError } from "rxjs";
 import { EmployeeManagementComponent } from "./employee-management.component";
 import { EmployeeService } from "../services/employee.service";
 import { Employee } from "../models/employee.model";
-import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from "@angular/common/http";
+import { EmployeeValidator } from "../utils/validators";
 
 describe("EmployeeManagementComponent", () => {
   let component: EmployeeManagementComponent;
@@ -46,12 +50,14 @@ describe("EmployeeManagementComponent", () => {
     ]);
 
     await TestBed.configureTestingModule({
-    declarations: [EmployeeManagementComponent],
-    imports: [FormsModule,
-        BrowserAnimationsModule,
-        ToastrModule.forRoot()],
-    providers: [{ provide: EmployeeService, useValue: employeeServiceSpy }, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-}).compileComponents();
+      declarations: [EmployeeManagementComponent],
+      imports: [FormsModule, BrowserAnimationsModule, ToastrModule.forRoot()],
+      providers: [
+        { provide: EmployeeService, useValue: employeeServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EmployeeManagementComponent);
     component = fixture.componentInstance;
