@@ -41,7 +41,7 @@ This Employee Management System is designed to provide a comprehensive solution 
 
 ### Frontend
 
-- **Angular 17** (non-standalone components)
+- **Angular 20** (non-standalone components)
 - **TypeScript** for type safety
 - **Bootstrap 5** for responsive UI
 - **Font Awesome** for icons
