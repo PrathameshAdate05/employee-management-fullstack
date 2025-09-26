@@ -1,12 +1,13 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { ToastrModule } from "ngx-toastr";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { of, throwError } from "rxjs";
 import { EmployeeManagementComponent } from "./employee-management.component";
 import { EmployeeService } from "../services/employee.service";
 import { Employee } from "../models/employee.model";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 
 describe("EmployeeManagementComponent", () => {
   let component: EmployeeManagementComponent;
@@ -45,15 +46,12 @@ describe("EmployeeManagementComponent", () => {
     ]);
 
     await TestBed.configureTestingModule({
-      declarations: [EmployeeManagementComponent],
-      imports: [
-        FormsModule,
-        HttpClientTestingModule,
+    declarations: [EmployeeManagementComponent],
+    imports: [FormsModule,
         BrowserAnimationsModule,
-        ToastrModule.forRoot(),
-      ],
-      providers: [{ provide: EmployeeService, useValue: employeeServiceSpy }],
-    }).compileComponents();
+        ToastrModule.forRoot()],
+    providers: [{ provide: EmployeeService, useValue: employeeServiceSpy }, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+}).compileComponents();
 
     fixture = TestBed.createComponent(EmployeeManagementComponent);
     component = fixture.componentInstance;
