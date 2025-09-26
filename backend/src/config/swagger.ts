@@ -17,16 +17,7 @@ const swaggerDefinition: SwaggerDefinition = {
       url: "https://opensource.org/licenses/MIT",
     },
   },
-  servers: [
-    {
-      url: "http://localhost:3000",
-      description: "Development server",
-    },
-    {
-      url: "https://api.example.com",
-      description: "Production server",
-    },
-  ],
+
   components: {
     schemas: {
       Employee: {
