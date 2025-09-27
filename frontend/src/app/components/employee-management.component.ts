@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
 import { ToastrService } from "ngx-toastr";
 import { EmployeeService } from "../services/employee.service";
 import {
@@ -15,6 +15,8 @@ import { EmployeeValidator } from "../utils/validators";
   styleUrls: ["./employee-management.component.css"],
 })
 export class EmployeeManagementComponent implements OnInit {
+  @ViewChild("addFormRef") addForm!: ElementRef<HTMLFormElement>;
+
   employees: Employee[] = [];
   filteredEmployees: Employee[] = [];
   searchQuery: string = "";
@@ -55,10 +57,9 @@ export class EmployeeManagementComponent implements OnInit {
           this.employees = response.data.employees;
           this.filteredEmployees = [...this.employees];
         } else {
-          this.toastr.error(
-            response.error || "Failed to load employees",
-            "Error"
-          );
+          const errorMessage =
+            response.message || response.error || "Failed to load employees";
+          this.toastr.error(errorMessage, "Error");
         }
         this.isLoading = false;
       },
@@ -84,7 +85,9 @@ export class EmployeeManagementComponent implements OnInit {
         if (response.success && response.data) {
           this.filteredEmployees = response.data.employees;
         } else {
-          this.toastr.error(response.error || "Search failed", "Search Error");
+          const errorMessage =
+            response.message || response.error || "Search failed";
+          this.toastr.error(errorMessage, "Search Error");
         }
         this.isLoading = false;
       },
@@ -129,7 +132,9 @@ export class EmployeeManagementComponent implements OnInit {
         if (response.success && response.data) {
           this.filteredEmployees = response.data.employees;
         } else {
-          this.toastr.error(response.error || "Search failed", "Search Error");
+          const errorMessage =
+            response.message || response.error || "Search failed";
+          this.toastr.error(errorMessage, "Search Error");
         }
         this.isLoading = false;
       },
@@ -153,10 +158,24 @@ export class EmployeeManagementComponent implements OnInit {
   closeAddModal(): void {
     this.showAddModal = false;
     this.resetNewEmployeeForm();
+    this.resetFormValidation();
   }
 
   private resetNewEmployeeForm(): void {
     this.newEmployee = { name: "", email: "", position: "", phone: "" };
+  }
+
+  private resetFormValidation(): void {
+    // Reset form validation state using ViewChild reference
+    if (this.addForm) {
+      this.addForm.nativeElement.reset();
+      // Remove any validation classes
+      const formControls =
+        this.addForm.nativeElement.querySelectorAll(".form-control");
+      formControls.forEach((control) => {
+        control.classList.remove("is-valid", "is-invalid");
+      });
+    }
   }
 
   openEditModal(employee: Employee): void {
@@ -202,20 +221,35 @@ export class EmployeeManagementComponent implements OnInit {
           this.employees.unshift(response.data);
           this.filteredEmployees = [...this.employees];
           this.closeAddModal();
+          this.resetFormValidation();
           this.toastr.success(
             `Employee "${response.data.name}" added successfully`,
             "Success"
           );
         } else {
-          this.toastr.error(
-            response.error || "Failed to create employee",
-            "Error"
-          );
+          // Handle API error response with message and error fields
+          const errorMessage =
+            response.message || response.error || "Failed to create employee";
+          this.toastr.error(errorMessage, "Error");
         }
         this.isLoading = false;
       },
       error: (error) => {
-        this.toastr.error("Error creating employee: " + error.message, "Error");
+        // Handle HTTP error responses (4xx, 5xx status codes)
+        let errorMessage = "Error creating employee";
+
+        if (error.error && typeof error.error === "object") {
+          // If the error response has the expected format
+          if (error.error.message) {
+            errorMessage = error.error.message;
+          } else if (error.error.error) {
+            errorMessage = error.error.error;
+          }
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+
+        this.toastr.error(errorMessage, "Error");
         this.isLoading = false;
       },
     });
@@ -255,18 +289,28 @@ export class EmployeeManagementComponent implements OnInit {
               "Success"
             );
           } else {
-            this.toastr.error(
-              response.error || "Failed to update employee",
-              "Error"
-            );
+            const errorMessage =
+              response.message || response.error || "Failed to update employee";
+            this.toastr.error(errorMessage, "Error");
           }
           this.isLoading = false;
         },
         error: (error) => {
-          this.toastr.error(
-            "Error updating employee: " + error.message,
-            "Error"
-          );
+          // Handle HTTP error responses (4xx, 5xx status codes)
+          let errorMessage = "Error updating employee";
+
+          if (error.error && typeof error.error === "object") {
+            // If the error response has the expected format
+            if (error.error.message) {
+              errorMessage = error.error.message;
+            } else if (error.error.error) {
+              errorMessage = error.error.error;
+            }
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
+          this.toastr.error(errorMessage, "Error");
           this.isLoading = false;
         },
       });
@@ -293,15 +337,28 @@ export class EmployeeManagementComponent implements OnInit {
             "Success"
           );
         } else {
-          this.toastr.error(
-            response.error || "Failed to delete employee",
-            "Error"
-          );
+          const errorMessage =
+            response.message || response.error || "Failed to delete employee";
+          this.toastr.error(errorMessage, "Error");
         }
         this.isLoading = false;
       },
       error: (error) => {
-        this.toastr.error("Error deleting employee: " + error.message, "Error");
+        // Handle HTTP error responses (4xx, 5xx status codes)
+        let errorMessage = "Error deleting employee";
+
+        if (error.error && typeof error.error === "object") {
+          // If the error response has the expected format
+          if (error.error.message) {
+            errorMessage = error.error.message;
+          } else if (error.error.error) {
+            errorMessage = error.error.error;
+          }
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+
+        this.toastr.error(errorMessage, "Error");
         this.isLoading = false;
       },
     });

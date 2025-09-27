@@ -104,14 +104,6 @@
     <i class="fas fa-users"></i>
     <h4>No employees found</h4>
     <p *ngIf="searchQuery">Try adjusting your search criteria</p>
-    <p *ngIf="!searchQuery">Get started by adding your first employee</p>
-    <button
-      class="btn add-btn mt-3"
-      (click)="openAddModal()"
-      *ngIf="!searchQuery"
-    >
-      <i class="fas fa-plus me-2"></i>Add Employee
-    </button>
   </div>
 </div>
 
@@ -133,7 +125,7 @@
         ></button>
       </div>
       <div class="modal-body">
-        <form #addForm="ngForm" (ngSubmit)="addEmployee()">
+        <form #addForm="ngForm" (ngSubmit)="addEmployee()" #addFormRef>
           <div class="mb-3">
             <label for="addName" class="form-label">Name *</label>
             <input
