@@ -332,6 +332,7 @@ export class EmployeeManagementComponent implements OnInit {
           );
           this.filteredEmployees = [...this.employees];
           this.closeDeleteModal();
+          this.clearSearch();
           this.toastr.success(
             `Employee "${employeeName}" deleted successfully`,
             "Success"
