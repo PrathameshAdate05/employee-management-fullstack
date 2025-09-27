@@ -1,5 +1,6 @@
 import sqlite3 from "sqlite3";
 import path from "path";
+import fs from "fs";
 import { Employee } from "../types";
 
 class Database {
@@ -7,6 +8,14 @@ class Database {
 
   constructor() {
     const dbPath = path.join(__dirname, "../../data/employees.db");
+    const dbDir = path.dirname(dbPath);
+
+    // Ensure the data directory exists
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+      console.log("Created data directory:", dbDir);
+    }
+
     this.db = new sqlite3.Database(dbPath, (err) => {
       if (err) {
         console.error("Error opening database:", err.message);

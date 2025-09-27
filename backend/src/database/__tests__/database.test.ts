@@ -1,5 +1,7 @@
 import { database } from "../index";
 import { Employee } from "../../types";
+import fs from "fs";
+import path from "path";
 
 describe("Database", () => {
   const getMockEmployee = (): Omit<
@@ -12,6 +14,66 @@ describe("Database", () => {
       .substr(2, 9)}@example.com`,
     position: "Developer",
     phone: "1234567890",
+  });
+
+  describe("Database Initialization", () => {
+    it("should create data directory if it doesn't exist", () => {
+      const dbPath = path.join(__dirname, "../../../data/employees.db");
+      const dbDir = path.dirname(dbPath);
+
+      // Check if directory exists (it should be created by the database constructor)
+      expect(fs.existsSync(dbDir)).toBe(true);
+    });
+
+    it("should create database file if it doesn't exist", () => {
+      const dbPath = path.join(__dirname, "../../../data/employees.db");
+
+      // Check if database file exists (it should be created by SQLite)
+      expect(fs.existsSync(dbPath)).toBe(true);
+    });
+
+    it("should initialize employees table", async () => {
+      // Try to create an employee to verify table exists and works
+      const mockEmployee = getMockEmployee();
+      const employeeId = await database.createEmployee(mockEmployee);
+
+      expect(employeeId).toBeGreaterThan(0);
+
+      // Clean up
+      await database.deleteEmployee(employeeId);
+    });
+
+    it("should handle database operations without errors", async () => {
+      // Test basic database operations to ensure everything works
+      const mockEmployee = getMockEmployee();
+
+      // Create
+      const employeeId = await database.createEmployee(mockEmployee);
+      expect(employeeId).toBeGreaterThan(0);
+
+      // Read
+      const createdEmployee = await database.getEmployeeById(employeeId);
+      expect(createdEmployee).toBeTruthy();
+      expect(createdEmployee?.name).toBe(mockEmployee.name);
+
+      // Update
+      const updateResult = await database.updateEmployee(employeeId, {
+        name: "Updated Name",
+      });
+      expect(updateResult).toBe(true);
+
+      // Verify update
+      const updatedEmployee = await database.getEmployeeById(employeeId);
+      expect(updatedEmployee?.name).toBe("Updated Name");
+
+      // Delete
+      const deleteResult = await database.deleteEmployee(employeeId);
+      expect(deleteResult).toBe(true);
+
+      // Verify deletion
+      const deletedEmployee = await database.getEmployeeById(employeeId);
+      expect(deletedEmployee).toBeNull();
+    });
   });
 
   describe("createEmployee", () => {
